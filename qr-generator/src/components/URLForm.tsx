@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { isValidUrl } from "@/utils/urlValidator";
 
 interface URLFormProps {
   onSubmit: (url: string, saveToHistory: boolean) => void;
@@ -11,18 +12,12 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
   const [saveToHistory, setSaveToHistory] = useState(false);
   const [isValid, setIsValid] = useState(true);
 
-  const urlRegex = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/;
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic URL validation
-    if (urlRegex.test(url)) {
+    if (isValidUrl(url)) {
         setIsValid(true);
-        
-        // Add https:// if not present
-        const finalUrl = url.startsWith('http') ? url : `https://${url}`;
-        onSubmit(finalUrl, saveToHistory);
+        onSubmit(url, saveToHistory);
       } else {
         setIsValid(false);
       }

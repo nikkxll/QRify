@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import URLForm from "@/components/URLForm";
+import { convertSvgToPng } from "@/utils/converter";
 
 interface QRGeneratorAppProps {
   initialView?: "generate" | "history";
@@ -68,25 +69,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
     }
   };
 
-  const convertSvgToPng = (svgUrl: string): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0);
-        
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error('Failed to convert to PNG'));
-        }, 'image/png');
-      };
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = svgUrl;
-    });
-   };
+
 
    const handleDownload = async () => {
     if (!qrCode) return;
