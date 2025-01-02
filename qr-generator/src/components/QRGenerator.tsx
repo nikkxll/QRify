@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import URLForm from '@/components/URLForm';
+import URLForm from "@/components/URLForm";
 
 interface QRGeneratorAppProps {
   initialView?: "generate" | "history";
@@ -11,7 +11,10 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
   initialView = "generate",
 }) => {
   const [currentView, setCurrentView] = useState(initialView);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,9 +29,101 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleFormSubmit = (url: string, saveToHistory: boolean) => {
-    console.log('Generating QR for:', url, 'Save to history:', saveToHistory);
+  const handleFormSubmit = async (url: string, saveToHistory: boolean) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetch("/api/qr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url,
+          config: {
+            body: "round",
+            eye: "frame6",
+            eyeBall: "ball15",
+            gradientColor1: "#8B5CF6",
+            gradientColor2: "#000000",
+            gradientType: "linear",
+          },
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to generate QR code");
+
+      const blob = await response.blob();
+      const qrUrl = URL.createObjectURL(blob);
+      setQrCode(qrUrl);
+
+      if (saveToHistory) {
+        console.log("Saving to history:", url);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to generate QR code"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const convertSvgToPng = (svgUrl: string): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0);
+        
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Failed to convert to PNG'));
+        }, 'image/png');
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = svgUrl;
+    });
+   };
+
+   const handleDownload = async () => {
+    if (!qrCode) return;
+    try {
+      const pngBlob = await convertSvgToPng(qrCode);
+      const blobUrl = URL.createObjectURL(pngBlob);
+      
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = 'qr_code.png';
+      link.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+   };
+
+   const handleShare = async () => {
+    if (!qrCode) return;
+    try {
+      const pngBlob = await convertSvgToPng(qrCode);
+      const file = new File([pngBlob], 'qr-code.png', { type: 'image/png' });
+   
+      if (navigator.share) {
+        await navigator.share({
+          title: 'QR Code',
+          text: 'Check out this QR code!',
+          files: [file]
+        });
+      } else {
+        await navigator.clipboard.writeText('QR Code Generated');
+        alert('Link copied to clipboard!');
+      }
+    } catch (err) {
+      setError('Failed to share QR code');
+    }
+   };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -96,70 +191,75 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
                 <div className="bg-black/20 backdrop-blur-xl rounded-2xl p-8 border border-white/10">
                   <URLForm onSubmit={handleFormSubmit} />
 
-                  {/* Buttons section */}
-                  <div className="mt-6 space-y-4">
-                    <button
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
-                      onClick={() => {}}
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                        />
-                      </svg>
-                      <span>Download Code</span>
-                    </button>
-
-                    <div className="flex space-x-4">
-                      <button
-                        className="flex-1 bg-black/20 hover:bg-black/30 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
-                        onClick={() => {}}
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                          />
-                        </svg>
-                        <span>Share via Email</span>
-                      </button>
-
-                      <button
-                        className="flex-1 bg-black/20 hover:bg-black/30 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
-                        onClick={() => {}}
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                          />
-                        </svg>
-                        <span>Share on Social Media</span>
-                      </button>
+                  {error && (
+                    <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                      <p className="text-red-400 text-sm">{error}</p>
                     </div>
-                  </div>
+                  )}
+
+                  {isLoading && (
+                    <div className="mt-8 flex justify-center">
+                      <div className="w-64 h-64 bg-white/10 rounded-lg flex items-center justify-center border border-white/20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                      </div>
+                    </div>
+                  )}
+
+                  {qrCode && !isLoading && (
+                    <div className="mt-8 space-y-6">
+                      <div className="flex justify-center">
+                        <div className="w-64 h-64 bg-white rounded-lg">
+                          <img
+                            src={qrCode}
+                            alt="Generated QR Code"
+                            className="w-full h-full"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex space-x-4 pt-2">
+                        <button
+                          onClick={handleDownload}
+                          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                            />
+                          </svg>
+                          <span>Download</span>
+                        </button>
+
+                        <button
+                          onClick={handleShare}
+                          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                            />
+                          </svg>
+                          <span>Share</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

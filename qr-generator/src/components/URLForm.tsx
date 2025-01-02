@@ -11,8 +11,7 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
   const [saveToHistory, setSaveToHistory] = useState(false);
   const [isValid, setIsValid] = useState(true);
 
-  const urlRegex =
-    /^((ftp|http|https):\/\/)?(www.)?(?!.*(ftp|http|https|www.))[a-zA-Z0-9_-]+(\.[a-zA-Z]+)+((\/)[\w#]+)*(\/\w+\?[a-zA-Z0-9_]+=\w+(&[a-zA-Z0-9_]+=\w+)*)?\/?$/;
+  const urlRegex = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
