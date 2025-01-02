@@ -1,5 +1,5 @@
-import QRGenerator from '@/components/QRGenerator'
+import HistoryView from "@/components/HistoryView";
 
-export default function History() {
-  return <QRGenerator initialView="history" />
+export default function HistoryPage() {
+  return <HistoryView />;
 }

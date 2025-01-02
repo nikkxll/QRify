@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import URLForm from "@/components/URLForm";
+import HistoryView from "@/components/HistoryView";
 import { convertSvgToPng } from "@/utils/converter";
 
 interface QRGeneratorAppProps {
@@ -35,7 +36,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch("/api/qr", {
+      const response = await fetch("/api/qr/generation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -53,12 +54,24 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
 
       if (!response.ok) throw new Error("Failed to generate QR code");
 
-      const blob = await response.blob();
+      const svgContent = await response.text();
+      const blob = new Blob([svgContent], { type: 'image/svg+xml' });
       const qrUrl = URL.createObjectURL(blob);
       setQrCode(qrUrl);
 
       if (saveToHistory) {
-        console.log("Saving to history:", url);
+        const response = await fetch('/api/qr/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url,
+            qrCode: svgContent
+          })
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to save to history');
+        }
       }
     } catch (err) {
       setError(
@@ -68,8 +81,6 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
       setIsLoading(false);
     }
   };
-
-
 
    const handleDownload = async () => {
     if (!qrCode) return;
@@ -166,7 +177,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
                   QR Generator
                 </h1>
                 <p className="text-xl text-white/80">
-                  Create static QR instantly for any URL.
+                  Create static QR instantly for any URL
                 </p>
               </div>
 
@@ -195,7 +206,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
                           <img
                             src={qrCode}
                             alt="Generated QR Code"
-                            className="w-full h-full"
+                            className="w-full h-full rounded-lg"
                           />
                         </div>
                       </div>
@@ -247,11 +258,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
               </div>
             </div>
           ) : (
-            <div className="max-w-7xl mx-auto px-4 py-12">
-              <div className="text-center">
-                <h1 className="text-6xl font-bold text-white mb-6">History</h1>
-              </div>
-            </div>
+            <HistoryView />
           )}
         </div>
       </div>
