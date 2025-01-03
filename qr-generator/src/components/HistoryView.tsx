@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface QRCodeRecord {
   _id: string;
@@ -17,14 +17,14 @@ export default function HistoryView() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await fetch('/api/qr/history');
-        if (!response.ok) throw new Error('Failed to fetch history');
-        
+        const response = await fetch("/api/qr/history");
+        if (!response.ok) throw new Error("Failed to fetch history");
+
         const data = await response.json();
         setQrCodes(data);
       } catch (error) {
-        setError('Failed to load QR code history');
-        console.error('History fetch error:', error);
+        setError("Failed to load QR code history");
+        console.error("History fetch error:", error);
       } finally {
         setIsLoading(false);
       }
@@ -35,26 +35,14 @@ export default function HistoryView() {
 
   const handleDownload = async (qrCode: string) => {
     try {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0);
-        
-        const pngUrl = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = pngUrl;
-        link.download = 'qr_code.png';
-        link.click();
-      };
-      const blob = new Blob([qrCode], { type: 'image/svg+xml' });
-      img.src = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = `data:image/png;base64,${qrCode}`;
+      link.download = "qr_code.png";
+      link.click();
     } catch (error) {
-      console.error('Download failed:', error);
+      console.error("Download failed:", error);
     }
-  };
+   };
 
   if (isLoading) {
     return (
@@ -75,32 +63,32 @@ export default function HistoryView() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <div className="text-center mb-16">
-        <h1 className="text-5xl font-bold text-white mb-6">
-          History
-        </h1>
-        <p className="text-xl text-white/80">
-          Previously generated QR codes
-        </p>
+        <h1 className="text-5xl font-bold text-white mb-6">History</h1>
+        <p className="text-xl text-white/80">Previously generated QR codes</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {qrCodes.map((qr) => (
-          <div 
-            key={qr._id} 
-            className="bg-black/20 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all"
+          <div
+            key={qr._id}
+            className="bg-black/20 backdrop-blur-xl rounded-2xl p-6"
           >
             <p className="text-white truncate mb-2">{qr.url}</p>
-            <div 
-                dangerouslySetInnerHTML={{ __html: qr.qrCode }} 
-                className="w-full h-full"
-            />
-            <div className="flex justify-between items-center">
-              <p className="text-base text-white/50">
+            <div className="w-64 h-64 mx-auto bg-white rounded-lg">
+              <img
+                src={`data:image/png;base64,${qr.qrCode}`}
+                alt="QR Code"
+                className="w-full h-full object-contain"
+                style={{ imageRendering: "pixelated" }}
+              />
+            </div>
+            <div className="mt-4 flex justify-between items-center">
+              <p className="text-sm text-white/50">
                 {new Date(qr.createdAt).toLocaleDateString()}
               </p>
-              <button 
+              <button
                 onClick={() => handleDownload(qr.qrCode)}
-                className="text-purple-400 hover:text-purple-300 text-sm transition-colors"
+                className="text-purple-400"
               >
                 Download
               </button>

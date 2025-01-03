@@ -6,20 +6,18 @@ export async function POST(req: NextRequest) {
   try {
     await connectToDb();
     const { url, qrCode } = await req.json();
-
+    
+    const cleanQRCode = qrCode.replace(/^data:image\/\w+;base64,/, '');
+    
     const newQR = new QRCode({
       url,
-      qrCode: qrCode,
+      qrCode: cleanQRCode
     });
 
-    const savedQR: IQRCode = await newQR.save();
+    const savedQR = await newQR.save();
     return NextResponse.json(savedQR);
   } catch (error) {
-    console.error("Failed to save QR code:", error);
-    return NextResponse.json(
-      { error: "Failed to save QR code" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to save QR code" }, { status: 500 });
   }
 }
 

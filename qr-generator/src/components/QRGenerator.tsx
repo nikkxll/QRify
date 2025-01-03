@@ -35,7 +35,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
     try {
       setIsLoading(true);
       setError(null);
-
+  
       const response = await fetch("/api/qr/generation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -51,32 +51,42 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
           },
         }),
       });
-
+  
       if (!response.ok) throw new Error("Failed to generate QR code");
-
+  
       const svgContent = await response.text();
-      const blob = new Blob([svgContent], { type: 'image/svg+xml' });
-      const qrUrl = URL.createObjectURL(blob);
-      setQrCode(qrUrl);
-
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      canvas.width = 350;
+      canvas.height = 350;
+      const ctx = canvas.getContext('2d');
+  
+      await new Promise((resolve, reject) => {
+        img.onload = () => {
+          const x = (canvas.width - img.width) / 2;
+          const y = (canvas.height - img.height) / 2;
+          ctx?.drawImage(img, x, y, img.width, img.height);
+          resolve(null);
+        };
+        img.onerror = reject;
+        img.src = 'data:image/svg+xml;base64,' + btoa(svgContent);
+      });
+  
+      const pngDataUrl = canvas.toDataURL('image/png');
+      setQrCode(pngDataUrl);
+  
       if (saveToHistory) {
-        const response = await fetch('/api/qr/history', {
+        await fetch('/api/qr/history', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             url,
-            qrCode: svgContent
+            qrCode: pngDataUrl
           })
         });
-  
-        if (!response.ok) {
-          throw new Error('Failed to save to history');
-        }
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to generate QR code"
-      );
+      setError(err instanceof Error ? err.message : "Failed to generate QR code");
     } finally {
       setIsLoading(false);
     }
