@@ -31,11 +31,15 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleFormSubmit = async (url: string, saveToHistory: boolean, backgroundColor: string) => {
+  const handleFormSubmit = async (
+    url: string,
+    saveToHistory: boolean,
+    backgroundColor: string
+  ) => {
     try {
       setIsLoading(true);
       setError(null);
-  
+
       const response = await fetch("/api/qr/generation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,20 +52,20 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
             // gradientColor1: "#8B5CF6",
             // gradientColor2: "#000000",
             // gradientType: "linear",
-            bgColor: backgroundColor.replace('#', ''),
+            bgColor: backgroundColor.replace("#", ""),
           },
         }),
       });
-  
+
       if (!response.ok) throw new Error("Failed to generate QR code");
-  
+
       const svgContent = await response.text();
       const img = new Image();
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = 350;
       canvas.height = 350;
-      const ctx = canvas.getContext('2d');
-  
+      const ctx = canvas.getContext("2d");
+
       await new Promise((resolve, reject) => {
         img.onload = () => {
           const x = (canvas.width - img.width) / 2;
@@ -70,65 +74,67 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
           resolve(null);
         };
         img.onerror = reject;
-        img.src = 'data:image/svg+xml;base64,' + btoa(svgContent);
+        img.src = "data:image/svg+xml;base64," + btoa(svgContent);
       });
-  
-      const pngDataUrl = canvas.toDataURL('image/png');
+
+      const pngDataUrl = canvas.toDataURL("image/png");
       setQrCode(pngDataUrl);
-  
+
       if (saveToHistory) {
-        await fetch('/api/qr/history', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        await fetch("/api/qr/history", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             url,
-            qrCode: pngDataUrl
-          })
+            qrCode: pngDataUrl,
+          }),
         });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate QR code");
+      setError(
+        err instanceof Error ? err.message : "Failed to generate QR code"
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-   const handleDownload = async () => {
+  const handleDownload = async () => {
     if (!qrCode) return;
     try {
       const pngBlob = await convertSvgToPng(qrCode);
       const blobUrl = URL.createObjectURL(pngBlob);
-      
-      const link = document.createElement('a');
+
+      const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = 'qr_code.png';
+      link.download = "qr_code.png";
       link.click();
       URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      console.error('Download failed:', error);
+      console.error("Download failed:", error);
     }
-   };
+  };
 
-   const handleShare = async () => {
+  const handleShare = async () => {
     if (!qrCode) return;
     try {
       const pngBlob = await convertSvgToPng(qrCode);
-      const file = new File([pngBlob], 'qr-code.png', { type: 'image/png' });
-   
+      const file = new File([pngBlob], "qr-code.png", { type: "image/png" });
+
       if (navigator.share) {
         await navigator.share({
-          title: 'QR Code',
-          text: 'Check out this QR code!',
-          files: [file]
+          title: "QR Code",
+          text: "Check out this QR code!",
+          files: [file],
         });
       } else {
-        await navigator.clipboard.writeText('QR Code Generated');
-        alert('Link copied to clipboard!');
+        await navigator.clipboard.writeText("QR Code Generated");
+        alert("Link copied to clipboard!");
       }
     } catch (err) {
-      setError('Failed to share QR code');
+      setError("Failed to share QR code");
     }
-   };
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -152,7 +158,12 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
                 isScrolled ? "h-14" : "h-16"
               }`}
             >
-              <div className="text-white font-bold text-2xl">QRify</div>
+              <div
+                className="text-white font-bold text-2xl cursor-pointer"
+                onClick={() => setCurrentView("generate")}
+              >
+                QRify
+              </div>
               <div className="flex space-x-8">
                 <button
                   onClick={() => setCurrentView("generate")}
@@ -213,7 +224,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
                   {qrCode && !isLoading && (
                     <div className="mt-8 space-y-6">
                       <div className="flex justify-center">
-                        <div className="w-64 h-64 bg-white rounded-lg">
+                        <div className="w-64 h-64 rounded-lg">
                           <img
                             src={qrCode}
                             alt="Generated QR Code"
