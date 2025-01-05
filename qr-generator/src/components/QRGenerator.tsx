@@ -31,7 +31,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleFormSubmit = async (url: string, saveToHistory: boolean) => {
+  const handleFormSubmit = async (url: string, saveToHistory: boolean, backgroundColor: string) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -45,9 +45,10 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
             body: "round",
             eye: "frame6",
             eyeBall: "ball15",
-            gradientColor1: "#8B5CF6",
-            gradientColor2: "#000000",
-            gradientType: "linear",
+            // gradientColor1: "#8B5CF6",
+            // gradientColor2: "#000000",
+            // gradientType: "linear",
+            bgColor: backgroundColor.replace('#', ''),
           },
         }),
       });

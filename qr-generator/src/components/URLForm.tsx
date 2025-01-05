@@ -1,23 +1,47 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { isValidUrl } from "@/utils/urlValidator";
 
 interface URLFormProps {
-  onSubmit: (url: string, saveToHistory: boolean) => void;
+  onSubmit: (url: string, saveToHistory: boolean, backgroundColor: string) => void;
 }
 
 const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
-  const [url, setUrl] = useState("");
-  const [saveToHistory, setSaveToHistory] = useState(false);
+  const [url, setUrl] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('qr_url') || "";
+    }
+    return "";
+  });
+  
+  const [saveToHistory, setSaveToHistory] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('qr_save_history') === 'true';
+    }
+    return false;
+  });
+  
+  const [backgroundColor, setBackgroundColor] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('qr_background_color') || "#FFFFFF";
+    }
+    return "#FFFFFF";
+  });
   const [isValid, setIsValid] = useState(true);
+
+  useEffect(() => {
+    localStorage.setItem('qr_url', url);
+    localStorage.setItem('qr_save_history', saveToHistory.toString());
+    localStorage.setItem('qr_background_color', backgroundColor);
+  }, [url, saveToHistory, backgroundColor]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isValidUrl(url)) {
         setIsValid(true);
-        onSubmit(url, saveToHistory);
+        onSubmit(url, saveToHistory, backgroundColor);
       } else {
         setIsValid(false);
       }
@@ -51,6 +75,35 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
         {!isValid && (
           <p className="mt-2 text-sm text-red-400">Please enter a valid URL</p>
         )}
+      </div>
+
+      <div>
+        <label 
+          htmlFor="bgColor" 
+          className="block text-sm font-medium text-white/80 mb-2"
+        >
+          Background Color
+        </label>
+        <div className="flex items-center space-x-3">
+          <input
+            type="color"
+            id="bgColor"
+            value={backgroundColor}
+            onChange={(e) => setBackgroundColor(e.target.value)}
+            className="h-10 w-20 bg-transparent border-0 rounded cursor-pointer"
+          />
+          <input
+            type="text"
+            value={backgroundColor}
+            onChange={(e) => {
+              if (e.target.value.startsWith('#')) {
+                setBackgroundColor(e.target.value);
+              }
+            }}
+            className="w-28 bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm"
+            placeholder="#FFFFFF"
+          />
+        </div>
       </div>
 
       <div className="flex items-center">
