@@ -4,21 +4,21 @@ import { QRCode } from '@/models/QRCode';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     await connectToDb();
 
-    console.log('Redirect requested for ID:', params.id); 
+    console.log('Redirect requested for ID:', context.params.id); 
 
-    const qr = await QRCode.findOne({ id: params.id });
+    const qr = await QRCode.findOne({ id: context.params.id });
     
     if (!qr) {
       return Response.redirect(new URL('/404', request.url));
     }
 
     await QRCode.updateOne(
-      { id: params.id },
+      { id: context.params.id },
       { $inc: { scans: 1 } }
     );
 
