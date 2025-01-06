@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import URLForm from "@/components/URLForm";
 import HistoryView from "@/components/HistoryView";
 import { convertSvgToPng } from "@/utils/converter";
@@ -49,9 +50,6 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
             body: "round",
             eye: "frame6",
             eyeBall: "ball15",
-            // gradientColor1: "#8B5CF6",
-            // gradientColor2: "#000000",
-            // gradientType: "linear",
             bgColor: backgroundColor.replace("#", ""),
           },
         }),
@@ -60,7 +58,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
       if (!response.ok) throw new Error("Failed to generate QR code");
 
       const svgContent = await response.text();
-      const img = new Image();
+      const img = document.createElement('img');
       const canvas = document.createElement("canvas");
       canvas.width = 350;
       canvas.height = 350;
@@ -132,6 +130,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
         alert("Link copied to clipboard!");
       }
     } catch (err) {
+      console.log("Failed to share QR code:", err);
       setError("Failed to share QR code");
     }
   };
@@ -140,10 +139,12 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
     <div className="min-h-screen relative overflow-hidden">
       {/* Background */}
       <div className="fixed inset-0 w-full h-full bg-black">
-        <img
+        <Image
           src="/back.svg"
           alt="Background"
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
+          priority
         />
       </div>
 
@@ -225,10 +226,12 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
                     <div className="mt-8 space-y-6">
                       <div className="flex justify-center">
                         <div className="w-64 h-64 rounded-lg">
-                          <img
+                          <Image
                             src={qrCode}
                             alt="Generated QR Code"
-                            className="w-full h-full rounded-lg"
+                            width={300}
+                            height={300}
+                            className="rounded-lg"
                           />
                         </div>
                       </div>

@@ -1,6 +1,6 @@
 export const convertSvgToPng = (svgUrl: string): Promise<Blob> => {
   return new Promise((resolve, reject) => {
-    const img = new Image();
+    const img = document.createElement('img');
     img.onload = () => {
       const canvas = document.createElement("canvas");
       canvas.width = img.width;

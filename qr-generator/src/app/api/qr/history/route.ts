@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     const savedQR = await newQR.save();
     return NextResponse.json(savedQR);
   } catch (error) {
+    console.log("Failed to connect to the db:", error);
     return NextResponse.json({ error: "Failed to save QR code" }, { status: 500 });
   }
 }

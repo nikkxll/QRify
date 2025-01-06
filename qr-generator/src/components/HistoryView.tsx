@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 interface QRCodeRecord {
   _id: string;
@@ -13,7 +14,7 @@ export default function HistoryView() {
   const [qrCodes, setQrCodes] = useState<QRCodeRecord[]>([]);
   const [filteredQrCodes, setFilteredQrCodes] = useState<QRCodeRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,7 +41,7 @@ export default function HistoryView() {
   }, []);
 
   useEffect(() => {
-    const filtered = qrCodes.filter(qr =>
+    const filtered = qrCodes.filter((qr) =>
       qr.url.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredQrCodes(filtered);
@@ -52,10 +53,9 @@ export default function HistoryView() {
   const currentQRs = filteredQrCodes.slice(indexOfFirstQR, indexOfLastQR);
   const totalPages = Math.ceil(filteredQrCodes.length / QR_PER_PAGE);
 
-
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const PaginationControls = () => {
@@ -69,8 +69,8 @@ export default function HistoryView() {
             onClick={() => handlePageChange(pageNum)}
             className={`px-4 py-2 rounded-lg transition-colors ${
               currentPage === pageNum
-                ? 'bg-purple-600 text-white'
-                : 'bg-black/20 text-white/70 hover:text-white hover:bg-black/30'
+                ? "bg-purple-600 text-white"
+                : "bg-black/20 text-white/70 hover:text-white hover:bg-black/30"
             }`}
           >
             {pageNum}
@@ -89,7 +89,7 @@ export default function HistoryView() {
     } catch (error) {
       console.error("Download failed:", error);
     }
-   };
+  };
 
   if (isLoading) {
     return (
@@ -133,10 +133,12 @@ export default function HistoryView() {
           >
             <p className="text-white truncate mb-2">{qr.url}</p>
             <div className="w-64 h-64 mx-auto rounded-lg">
-              <img
+              <Image
                 src={`data:image/png;base64,${qr.qrCode}`}
                 alt="QR Code"
-                className="w-full h-full object-contain"
+                width={300}
+                height={300}
+                className="object-contain"
                 style={{ imageRendering: "pixelated" }}
               />
             </div>
@@ -157,7 +159,9 @@ export default function HistoryView() {
 
       {filteredQrCodes.length === 0 ? (
         <div className="text-center text-white/50 mt-8">
-          {searchTerm ? 'No matching QR codes found' : 'No QR codes in history yet'}
+          {searchTerm
+            ? "No matching QR codes found"
+            : "No QR codes in history yet"}
         </div>
       ) : (
         <PaginationControls />
