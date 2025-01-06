@@ -5,16 +5,20 @@ import { QRCode, IQRCode } from "@/models/QRCode";
 export async function POST(req: NextRequest) {
   try {
     await connectToDb();
+    console.log("connected");
     const { url, qrCode } = await req.json();
+    console.log("url and code", url, qrCode);
     
     const cleanQRCode = qrCode.replace(/^data:image\/\w+;base64,/, '');
     
+    console.log("cleanQRCode", cleanQRCode);
     const newQR = new QRCode({
       url,
       qrCode: cleanQRCode
     });
-
+    
     const savedQR = await newQR.save();
+    console.log("savedQR", savedQR);
     return NextResponse.json(savedQR);
   } catch (error) {
     console.log("Failed to connect to the db:", error);
