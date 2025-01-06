@@ -1,16 +1,21 @@
+import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
 const QR_API_URL = 'https://api.qrcode-monkey.com/qr/custom';
+const baseUrl = 'https://qrify-56d0.onrender.com';
 
 export async function POST(req: NextRequest) {
   try {
-    const { url, config } = await req.json();
+    const { config } = await req.json();
+
+    const qrId = randomUUID();
+    const trackingUrl = `${baseUrl}/redirect/${qrId}`;
 
     const response = await fetch(QR_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        data: url,
+        data: trackingUrl,
         config,
         size: 300,
         download: false,
