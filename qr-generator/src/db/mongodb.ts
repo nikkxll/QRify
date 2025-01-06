@@ -8,7 +8,10 @@ export async function connectToDb() {
       return mongoose.connection;
     }
     
-    return await mongoose.connect(MONGODB_URI);
+    console.log('Connecting to MongoDB...');
+    const conn = await mongoose.connect(MONGODB_URI);
+    console.log('MongoDB Connected');
+    return conn;
   } catch (error) {
     console.error('MongoDB connection error:', error);
     throw error;
