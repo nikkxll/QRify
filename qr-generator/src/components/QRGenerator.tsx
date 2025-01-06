@@ -58,6 +58,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
       if (!response.ok) throw new Error("Failed to generate QR code");
 
       const svgContent = await response.text();
+      const trackingId = response.headers.get('X-Tracking-Id');
       const img = document.createElement('img');
       const canvas = document.createElement("canvas");
       canvas.width = 350;
@@ -85,6 +86,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
           body: JSON.stringify({
             url,
             qrCode: pngDataUrl,
+            trackingId
           }),
         });
       }

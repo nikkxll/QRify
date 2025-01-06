@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
 const QR_API_URL = 'https://api.qrcode-monkey.com/qr/custom';
-const baseUrl = 'https://qrify-56d0.onrender.com';
+const baseUrl = 'http://192.168.1.49:3000';
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,7 +29,10 @@ export async function POST(req: NextRequest) {
 
     const imageBuffer = await response.arrayBuffer();
     return new NextResponse(imageBuffer, {
-      headers: { 'Content-Type': 'image/svg+xml' }
+      headers: { 
+        'Content-Type': 'image/svg+xml',
+        'X-Tracking-Id': qrId
+      }
     });
 
   } catch (error) {

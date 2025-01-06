@@ -1,6 +1,7 @@
 import { Schema, model, models, Document } from 'mongoose';
 
 export interface IQRCode extends Document {
+  trackingId: string;
   url: string;
   qrCode: string;
   scans: number;
@@ -8,6 +9,7 @@ export interface IQRCode extends Document {
 }
 
 const QRCodeSchema = new Schema<IQRCode>({
+  trackingId: { type: String, required: true, unique: true },
   url: { type: String, required: true },
   qrCode: { type: String, required: true },
   scans: { type: Number, default: 0 },

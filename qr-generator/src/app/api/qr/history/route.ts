@@ -5,11 +5,12 @@ import { QRCode, IQRCode } from "@/models/QRCode";
 export async function POST(req: NextRequest) {
   try {
     await connectToDb();
-    const { url, qrCode } = await req.json();
+    const { url, qrCode, trackingId } = await req.json();
     
     const cleanQRCode = qrCode.replace(/^data:image\/\w+;base64,/, '');
     
     const newQR = new QRCode({
+      trackingId,
       url,
       qrCode: cleanQRCode
     });
