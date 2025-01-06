@@ -130,7 +130,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
         alert("Link copied to clipboard!");
       }
     } catch (err) {
-      console.log("Failed to share QR code:", err);
+      console.error("Failed to share QR code:", err);
       setError("Failed to share QR code");
     }
   };
