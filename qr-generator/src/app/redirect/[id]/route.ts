@@ -24,7 +24,7 @@ export async function GET(
 
     return Response.redirect(qr.originalUrl);
   } catch (error) {
-    console.error("Failed to redirect");
+    console.error("Failed to redirect", error);
     return Response.redirect(new URL('/error', request.url));
   }
 }
