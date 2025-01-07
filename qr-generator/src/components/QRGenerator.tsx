@@ -79,17 +79,16 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
       const pngDataUrl = canvas.toDataURL("image/png");
       setQrCode(pngDataUrl);
 
-      if (saveToHistory) {
-        await fetch("/api/qr/history", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url,
-            qrCode: pngDataUrl,
-            trackingId
-          }),
-        });
-      }
+      await fetch("/api/qr/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url,
+          qrCode: pngDataUrl,
+          trackingId,
+          showInHistory: saveToHistory
+        }),
+      });
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to generate QR code"

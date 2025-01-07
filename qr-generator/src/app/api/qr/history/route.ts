@@ -5,14 +5,15 @@ import { QRCode, IQRCode } from "@/models/QRCode";
 export async function POST(req: NextRequest) {
   try {
     await connectToDb();
-    const { url, qrCode, trackingId } = await req.json();
+    const { url, qrCode, trackingId, showInHistory } = await req.json();
     
     const cleanQRCode = qrCode.replace(/^data:image\/\w+;base64,/, '');
     
     const newQR = new QRCode({
       trackingId,
       url,
-      qrCode: cleanQRCode
+      qrCode: cleanQRCode,
+      showInHistory
     });
     
     const savedQR = await newQR.save();
@@ -26,11 +27,11 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   try {
     await connectToDb();
-    const qrCodes: IQRCode[] = await QRCode.find()
+    const qrCodes: IQRCode[] = await QRCode.find({ showInHistory: true })
       .sort({ createdAt: -1 })
-      .select('url qrCode createdAt')
+      .select('url qrCode createdAt scans')
       .exec();
-
+    
     return NextResponse.json(qrCodes);
   } catch (error) {
     console.error("Failed to fetch QR codes:", error);

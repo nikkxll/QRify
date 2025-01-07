@@ -15,13 +15,6 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
     return "";
   });
   
-  const [saveToHistory, setSaveToHistory] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('qr_save_history') === 'true';
-    }
-    return false;
-  });
-  
   const [backgroundColor, setBackgroundColor] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('qr_background_color') || "#FFFFFF";
@@ -29,12 +22,12 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
     return "#FFFFFF";
   });
   const [isValid, setIsValid] = useState(true);
+  const [saveToHistory, setSaveToHistory] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('qr_url', url);
-    localStorage.setItem('qr_save_history', saveToHistory.toString());
     localStorage.setItem('qr_background_color', backgroundColor);
-  }, [url, saveToHistory, backgroundColor]);
+  }, [url, backgroundColor]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

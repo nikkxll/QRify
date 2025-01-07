@@ -147,7 +147,7 @@ export default function HistoryView() {
               <p className="text-sm text-white/50">
                 {new Date(qr.createdAt).toLocaleDateString()}
               </p>
-              <span className="text-purple-400">{qr.scans} scans</span>
+              <span className="text-purple-400">Scans: {qr.scans}</span>
               <button
                 onClick={() => handleDownload(qr.qrCode)}
                 className="text-purple-400"

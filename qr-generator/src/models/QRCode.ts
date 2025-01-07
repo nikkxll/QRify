@@ -5,6 +5,7 @@ export interface IQRCode extends Document {
   url: string;
   qrCode: string;
   scans: number;
+  showInHistory: boolean;
   createdAt: Date;
 }
 
@@ -13,6 +14,7 @@ const QRCodeSchema = new Schema<IQRCode>({
   url: { type: String, required: true },
   qrCode: { type: String, required: true },
   scans: { type: Number, default: 0 },
+  showInHistory: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 
