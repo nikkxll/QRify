@@ -1,17 +1,17 @@
 import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
-const QR_API_URL = 'https://api.qrcode-monkey.com/qr/custom';
-const baseUrl = 'http://192.168.1.49:3000';
+const BASE_URL = process.env.BASE_URL!;
+const API_URL = process.env.QR_API_URL!;
 
 export async function POST(req: NextRequest) {
   try {
     const { config } = await req.json();
 
     const qrId = randomUUID();
-    const trackingUrl = `${baseUrl}/redirect/${qrId}`;
+    const trackingUrl = `${BASE_URL}/redirect/${qrId}`;
 
-    const response = await fetch(QR_API_URL, {
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
