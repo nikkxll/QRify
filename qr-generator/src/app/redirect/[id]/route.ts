@@ -6,6 +6,15 @@ type Props = {
   params: Promise<{ id: string }>
 }
 
+/**
+ * Redirect QR Code
+ * - Retrieves a QR code by tracking ID, increments amount of scans and redirects to its URL
+ * 
+ * Response:
+ * - Success: Redirects to the QR code URL and increments scan count.
+ * - Failure: Redirects to 404 or error page.
+ */
+
 export async function GET(
   request: NextRequest,
   props: Props,

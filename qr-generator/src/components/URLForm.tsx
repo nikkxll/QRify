@@ -109,7 +109,7 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
             focus:ring-purple-500 focus:ring-offset-0"
         />
         <label htmlFor="saveHistory" className="ml-2 text-sm text-white/80">
-          Save to history
+          Save to shared history
         </label>
       </div>
 

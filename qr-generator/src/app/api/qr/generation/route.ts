@@ -4,6 +4,15 @@ import { NextRequest, NextResponse } from 'next/server';
 const BASE_URL = process.env.BASE_URL!;
 const API_URL = process.env.QR_API_URL!;
 
+/**
+ * QR Code Generator API
+ * - POST: Generates a QR code with a unique tracking URL
+ * - Request: { url, config }
+ * - Response: SVG image with headers:
+ *   - Content-Type: image/svg+xml
+ *   - X-Tracking-Id: <UUID>
+ */
+
 export async function POST(req: NextRequest) {
   try {
     const { config } = await req.json();

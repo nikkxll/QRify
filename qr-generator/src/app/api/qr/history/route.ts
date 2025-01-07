@@ -2,6 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDb } from "@/db/mongodb";
 import { QRCode, IQRCode } from "@/models/QRCode";
 
+/**
+ * Save QR Code
+ * - Saves a QR code entry to the database
+ * 
+ * Request Body:
+ * {
+ *   url: string,
+ *   qrCode: string,
+ *   trackingId: string,
+ *   showInHistory: boolean
+ * }
+ * 
+ * Response:
+ * - Success: JSON object of the saved QR code
+ * - Failure: JSON error response with status 500
+ */
+
 export async function POST(req: NextRequest) {
   try {
     await connectToDb();
@@ -23,6 +40,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to save QR code" }, { status: 500 });
   }
 }
+
+/**
+ * Fetch QR Codes
+ * - Retrieves QR codes visible in history from the database
+ * 
+ * Response:
+ * - Success: Array of QR codes with fields:
+ *   - url: string
+ *   - qrCode: string (Base64 image data)
+ *   - createdAt: Date
+ *   - scans: number
+ * - Failure: JSON error response with status 500
+ */
 
 export async function GET() {
   try {
