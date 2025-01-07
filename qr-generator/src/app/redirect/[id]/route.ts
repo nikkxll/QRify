@@ -1,33 +1,33 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDb } from '@/db/mongodb';
 import { QRCode } from '@/models/QRCode';
 
+type Props = {
+  params: Promise<{ id: string }>
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: Props,
 ) {
   try {
     await connectToDb();
 
-    const { id } = await params;
-
-    console.log('Redirect requested for ID:', id); 
-
-    const qr = await QRCode.findOne({ trackingId: id });
-    console.log('Found QR:', qr);
+    const params = await props.params;
+    const qr = await QRCode.findOne({ trackingId: params.id });
     
     if (!qr) {
-      return Response.redirect(qr.url);
+      return NextResponse.redirect(new URL('/404', request.url));
     }
 
     await QRCode.updateOne(
-      { trackingId: id },
+      { trackingId: params.id },
       { $inc: { scans: 1 } }
     );
 
-    return Response.redirect(qr.url);
+    return NextResponse.redirect(new URL(qr.url, request.url));
   } catch (error) {
     console.error("Failed to redirect", error);
-    return Response.redirect(new URL('/error', request.url));
+    return NextResponse.redirect(new URL('/error', request.url));
   }
 }
