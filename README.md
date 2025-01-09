@@ -1,4 +1,4 @@
-# qrify
+# QRify
 
 ## Summary
 
