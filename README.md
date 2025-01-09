@@ -5,12 +5,8 @@
 Simple QR Code generator for any provided URL
 
 Technical stack: 
-- Typescript
-- NextJS
-- TailwindCSS
-- MongoDB
-- QRCode Monkey API
-- Render
+
+[![Stack](https://skillicons.dev/icons?i=ts,nextjs,tailwind,mongodb)](https://skillicons.dev)
 
 ## Backend endpoints
 
@@ -116,6 +112,8 @@ In dev mode
 ```
 cd qr-generator/ && npm i && npm run dev
 ```
+
+## Website
 
 Link to the web page:
 
