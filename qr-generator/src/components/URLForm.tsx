@@ -3,35 +3,47 @@
 import React, { useState, useEffect } from "react";
 import { isValidUrl } from "@/utils/urlValidator";
 import QRStyleSelect from "@/components/QRStyleSelect";
+import QREyeSelect from "@/components/QREyeSelect";
 
 interface URLFormProps {
-  onSubmit: (url: string, backgroundColor: string, bodyStyle: string) => void;
+  onSubmit: (
+    url: string,
+    backgroundColor: string,
+    bodyStyle: string,
+    eyeStyle: string
+  ) => void;
 }
 
 const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
   const [url, setUrl] = useState("");
   const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
   const [bodyStyle, setBodyStyle] = useState("round");
+  const [eyeStyle, setEyeStyle] = useState("frame0");
   const [isValid, setIsValid] = useState(true);
 
   useEffect(() => {
-    setUrl(localStorage.getItem('qr_url') || "");
-    setBackgroundColor(localStorage.getItem('qr_background_color') || "#FFFFFF");
-    setBodyStyle(localStorage.getItem('qr_body_style') || "round");
+    setUrl(localStorage.getItem("qr_url") || "");
+    setBackgroundColor(
+      localStorage.getItem("qr_background_color") || "#FFFFFF"
+    );
+    setBodyStyle(localStorage.getItem("qr_body_style") || "round");
+    setEyeStyle(localStorage.getItem("eye_style") || "frame0");
   }, []);
 
   useEffect(() => {
-    if (url) localStorage.setItem('qr_url', url);
-    if (backgroundColor) localStorage.setItem('qr_background_color', backgroundColor);
-    if (bodyStyle) localStorage.setItem('qr_body_style', bodyStyle);
-  }, [url, backgroundColor, bodyStyle]);
+    if (url) localStorage.setItem("qr_url", url);
+    if (backgroundColor)
+      localStorage.setItem("qr_background_color", backgroundColor);
+    if (bodyStyle) localStorage.setItem("qr_body_style", bodyStyle);
+    if (eyeStyle) localStorage.setItem("eye_style", eyeStyle);
+  }, [url, backgroundColor, bodyStyle, eyeStyle]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isValidUrl(url)) {
       setIsValid(true);
-      onSubmit(url, backgroundColor, bodyStyle);
+      onSubmit(url, backgroundColor, bodyStyle, eyeStyle);
     } else {
       setIsValid(false);
     }
@@ -97,16 +109,17 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
       </div>
 
       <div>
-        <label 
-          htmlFor="bodyStyle" 
-          className="block text-sm font-medium text-white/80 mb-2"
-        >
+        <label className="block text-sm font-medium text-white/80 mb-2">
           Body Style
         </label>
-        <QRStyleSelect
-          value={bodyStyle}
-          onChange={setBodyStyle}
-        />
+        <QRStyleSelect value={bodyStyle} onChange={setBodyStyle} />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-white/80 mb-2">
+          Eye Style
+        </label>
+        <QREyeSelect value={eyeStyle} onChange={setEyeStyle} />
       </div>
 
       <button

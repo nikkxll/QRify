@@ -3,47 +3,40 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 
-interface QRStyleOption {
+interface QREyeOption {
   value: string;
   label: string;
   previewUrl: string;
 }
 
-interface QRStyleSelectProps {
+interface QREyeSelectProps {
   value: string;
   onChange: (value: string) => void;
 }
 
-const styles: QRStyleOption[] = [
-  { value: 'square', label: 'Square', previewUrl: '/assets/qr-styles/square.png' },
-  { value: 'mosaic', label: 'Mosaic', previewUrl: '/assets/qr-styles/mosaic.png' },
-  { value: 'dot', label: 'Dot', previewUrl: '/assets/qr-styles/dot.png' },
-  { value: 'circle', label: 'Circle', previewUrl: '/assets/qr-styles/circle.png' },
-  { value: 'circle-zebra', label: 'Circle Zebra', previewUrl: '/assets/qr-styles/circle-zebra.png' },
-  { value: 'circle-zebra-vertical', label: 'Circle Zebra Vertical', previewUrl: '/assets/qr-styles/circle-zebra-vertical.png' },
-  { value: 'circular', label: 'Circular', previewUrl: '/assets/qr-styles/circular.png' },
-  { value: 'edge-cut', label: 'Edge Cut', previewUrl: '/assets/qr-styles/edge-cut.png' },
-  { value: 'edge-cut-smooth', label: 'Edge Cut Smooth', previewUrl: '/assets/qr-styles/edge-cut-smooth.png' },
-  { value: 'japnese', label: 'Japanese', previewUrl: '/assets/qr-styles/japnese.png' },
-  { value: 'leaf', label: 'Leaf', previewUrl: '/assets/qr-styles/leaf.png' },
-  { value: 'pointed', label: 'Pointed', previewUrl: '/assets/qr-styles/pointed.png' },
-  { value: 'pointed-edge-cut', label: 'Pointed Edge Cut', previewUrl: '/assets/qr-styles/pointed-edge-cut.png' },
-  { value: 'pointed-in', label: 'Pointed In', previewUrl: '/assets/qr-styles/pointed-in.png' },
-  { value: 'pointed-in-smooth', label: 'Pointed In Smooth', previewUrl: '/assets/qr-styles/pointed-in-smooth.png' },
-  { value: 'pointed-smooth', label: 'Pointed Smooth', previewUrl: '/assets/qr-styles/pointed-smooth.png' },
-  { value: 'round', label: 'Round', previewUrl: '/assets/qr-styles/round.png' },
-  { value: 'rounded-in', label: 'Rounded In', previewUrl: '/assets/qr-styles/rounded-in.png' },
-  { value: 'rounded-in-smooth', label: 'Rounded In Smooth', previewUrl: '/assets/qr-styles/rounded-in-smooth.png' },
-  { value: 'rounded-pointed', label: 'Rounded Pointed', previewUrl: '/assets/qr-styles/rounded-pointed.png' },
-  { value: 'star', label: 'Star', previewUrl: '/assets/qr-styles/star.png' },
-  { value: 'diamond', label: 'Diamond', previewUrl: '/assets/qr-styles/diamond.png' },
+const eyeStyles: QREyeOption[] = [
+  { value: 'frame0', label: 'Option 0', previewUrl: '/assets/qr-eyes/frame0.png' },
+  { value: 'frame1', label: 'Option 1', previewUrl: '/assets/qr-eyes/frame1.png' },
+  { value: 'frame2', label: 'Option 2', previewUrl: '/assets/qr-eyes/frame2.png' },
+  { value: 'frame3', label: 'Option 3', previewUrl: '/assets/qr-eyes/frame3.png' },
+  { value: 'frame4', label: 'Option 4', previewUrl: '/assets/qr-eyes/frame4.png' },
+  { value: 'frame5', label: 'Option 5', previewUrl: '/assets/qr-eyes/frame5.png' },
+  { value: 'frame6', label: 'Option 6', previewUrl: '/assets/qr-eyes/frame6.png' },
+  { value: 'frame7', label: 'Option 7', previewUrl: '/assets/qr-eyes/frame7.png' },
+  { value: 'frame8', label: 'Option 8', previewUrl: '/assets/qr-eyes/frame8.png' },
+  { value: 'frame10', label: 'Option 9', previewUrl: '/assets/qr-eyes/frame10.png' },
+  { value: 'frame11', label: 'Option 10', previewUrl: '/assets/qr-eyes/frame11.png' },
+  { value: 'frame12', label: 'Option 11', previewUrl: '/assets/qr-eyes/frame12.png' },
+  { value: 'frame13', label: 'Option 12', previewUrl: '/assets/qr-eyes/frame13.png' },
+  { value: 'frame14', label: 'Option 13', previewUrl: '/assets/qr-eyes/frame14.png' },
+  { value: 'frame16', label: 'Option 14', previewUrl: '/assets/qr-eyes/frame16.png' },
 ];
 
-export default function QRStyleSelect({ value, onChange }: QRStyleSelectProps) {
+export default function QREyeSelect({ value, onChange }: QREyeSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const selectedStyle = styles.find(style => style.value === value) || styles[0];
+  const selectedStyle = eyeStyles.find(style => style.value === value) || eyeStyles[0];
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -95,7 +88,7 @@ export default function QRStyleSelect({ value, onChange }: QRStyleSelectProps) {
       {isOpen && (
         <div className="absolute z-10 w-full mt-2 bg-black/100 backdrop-blur-xl border border-white/40 
           rounded-lg shadow-lg max-h-[240px] overflow-auto custom-scrollbar">
-          {styles.map((style) => (
+          {eyeStyles.map((style) => (
             <button
               key={style.value}
               type="button"
