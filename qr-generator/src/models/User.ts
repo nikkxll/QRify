@@ -3,8 +3,9 @@ import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
     email: string;
-    password: string;
+    password?: string;
     name: string;
+    googleId?: string;
     createdAt: Date;
     comparePassword(candidatePassword: string): Promise<boolean>;
   }
@@ -19,11 +20,16 @@ export interface IUser extends Document {
     },
     password: { 
       type: String, 
-      required: true 
+      required: false
     },
     name: { 
       type: String, 
       required: true 
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+      unique: true
     },
     createdAt: { 
       type: Date, 
@@ -32,7 +38,7 @@ export interface IUser extends Document {
   });
   
   UserSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) return next();
+    if (!this.isModified('password') || !this.password) return next();
     
     try {
       const salt = await bcrypt.genSalt(10);
@@ -44,6 +50,7 @@ export interface IUser extends Document {
   });
   
   UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+    if (!this.password) return false;
     return bcrypt.compare(candidatePassword, this.password);
   };
   

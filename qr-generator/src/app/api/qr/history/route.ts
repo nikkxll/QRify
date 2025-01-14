@@ -23,7 +23,7 @@ import { FilterQuery } from "mongoose";
 export async function POST(req: NextRequest) {
   try {
     await connectToDb();
-    const user = await authenticateUser(req);
+    const user = await authenticateUser();
     const { url, qrCode, trackingId } = await req.json();
     
     const cleanQRCode = qrCode.replace(/^data:image\/\w+;base64,/, '');
@@ -56,10 +56,10 @@ export async function POST(req: NextRequest) {
  * - Failure: JSON error response with status 500
  */
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     await connectToDb();
-    const user = await authenticateUser(req);
+    const user = await authenticateUser();
 
     if (!user?.userId) {
       return NextResponse.json([]);

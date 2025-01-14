@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { connectToDb } from '@/db/mongodb';
 import { User } from '@/models/User';
 import { authenticateUser } from '@/middleware/auth';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const user = await authenticateUser(req);
+    const user = await authenticateUser();
     
     if (!user?.userId) {
       return NextResponse.json({ user: null });

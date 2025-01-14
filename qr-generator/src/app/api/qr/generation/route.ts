@@ -17,7 +17,7 @@ const API_URL = process.env.QR_API_URL!;
 export async function POST(req: NextRequest) {
   try {
     const { config } = await req.json();
-    const user = await authenticateUser(req);
+    const user = await authenticateUser();
 
     const qrId = randomUUID();
     const trackingUrl = `${BASE_URL}/redirect/${qrId}`;

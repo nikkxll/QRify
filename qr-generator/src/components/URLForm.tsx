@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { isValidUrl } from "@/utils/urlValidator";
-import { useAuth } from "@/components/Auth";
 
 interface URLFormProps {
   onSubmit: (url: string, backgroundColor: string) => void;
