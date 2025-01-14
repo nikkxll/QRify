@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const storedState = request.cookies.get('oauth_state')?.value;
 
     if (!state || !storedState || state !== storedState) {
-      return NextResponse.redirect(new URL('/error?message=invalid_state', request.url));
+      return NextResponse.redirect(new URL('/error?message=invalid_state', process.env.BASE_URL!));
     }
 
     const tokenResponse = await fetch(TOKEN_URL, {
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       .setExpirationTime('7d')
       .sign(JWT_SECRET);
 
-    const response = NextResponse.redirect(new URL('/', request.url));
+    const response = NextResponse.redirect(new URL('/', process.env.BASE_URL!));
     response.cookies.set('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -71,6 +71,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Google auth error:', error);
-    return NextResponse.redirect(new URL('/error?message=auth_failed', request.url));
+    return NextResponse.redirect(new URL('/error?message=auth_failed', process.env.BASE_URL!));
   }
 }
