@@ -2,41 +2,39 @@
 
 import React, { useState, useEffect } from "react";
 import { isValidUrl } from "@/utils/urlValidator";
+import QRStyleSelect from "@/components/QRStyleSelect";
 
 interface URLFormProps {
-  onSubmit: (url: string, backgroundColor: string) => void;
+  onSubmit: (url: string, backgroundColor: string, bodyStyle: string) => void;
 }
 
 const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
-  const [url, setUrl] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('qr_url') || "";
-    }
-    return "";
-  });
-  
-  const [backgroundColor, setBackgroundColor] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('qr_background_color') || "#FFFFFF";
-    }
-    return "#FFFFFF";
-  });
+  const [url, setUrl] = useState("");
+  const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
+  const [bodyStyle, setBodyStyle] = useState("round");
   const [isValid, setIsValid] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem('qr_url', url);
-    localStorage.setItem('qr_background_color', backgroundColor);
-  }, [url, backgroundColor]);
+    setUrl(localStorage.getItem('qr_url') || "");
+    setBackgroundColor(localStorage.getItem('qr_background_color') || "#FFFFFF");
+    setBodyStyle(localStorage.getItem('qr_body_style') || "round");
+  }, []);
+
+  useEffect(() => {
+    if (url) localStorage.setItem('qr_url', url);
+    if (backgroundColor) localStorage.setItem('qr_background_color', backgroundColor);
+    if (bodyStyle) localStorage.setItem('qr_body_style', bodyStyle);
+  }, [url, backgroundColor, bodyStyle]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isValidUrl(url)) {
-        setIsValid(true);
-        onSubmit(url, backgroundColor);
-      } else {
-        setIsValid(false);
-      }
+      setIsValid(true);
+      onSubmit(url, backgroundColor, bodyStyle);
+    } else {
+      setIsValid(false);
+    }
   };
 
   return (
@@ -70,8 +68,8 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
       </div>
 
       <div>
-        <label 
-          htmlFor="bgColor" 
+        <label
+          htmlFor="bgColor"
           className="block text-sm font-medium text-white/80 mb-2"
         >
           Background Color
@@ -88,7 +86,7 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
             type="text"
             value={backgroundColor}
             onChange={(e) => {
-              if (e.target.value.startsWith('#')) {
+              if (e.target.value.startsWith("#")) {
                 setBackgroundColor(e.target.value);
               }
             }}
@@ -96,6 +94,19 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
             placeholder="#FFFFFF"
           />
         </div>
+      </div>
+
+      <div>
+        <label 
+          htmlFor="bodyStyle" 
+          className="block text-sm font-medium text-white/80 mb-2"
+        >
+          Body Style
+        </label>
+        <QRStyleSelect
+          value={bodyStyle}
+          onChange={setBodyStyle}
+        />
       </div>
 
       <button

@@ -17,7 +17,26 @@ export default function LoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+    }, 300);
+  };
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -25,7 +44,7 @@ export default function LoginForm({
         modalRef.current &&
         !modalRef.current.contains(event.target as Node)
       ) {
-        onClose();
+        handleClose();
       }
     }
 
@@ -42,7 +61,7 @@ export default function LoginForm({
 
     try {
       await login(email, password);
-      onClose();
+      handleClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -51,10 +70,12 @@ export default function LoginForm({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 
+      ${isClosing ? 'modal-backdrop-exit' : 'modal-backdrop-enter'}`}>
       <div
         ref={modalRef}
-        className="bg-black/80 p-8 rounded-2xl w-full max-w-md border border-white/10"
+        className={`bg-black/100 p-8 rounded-2xl w-full max-w-md border border-white/10 
+          ${isClosing ? 'modal-content-exit' : 'modal-content-enter'}`}
       >
         <h2 className="text-2xl font-bold text-white mb-6">Login</h2>
 
@@ -156,7 +177,7 @@ export default function LoginForm({
             <div className="flex justify-between items-center">
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleClose}
                 className="text-white/60 hover:text-white text-sm transition-colors"
               >
                 Cancel

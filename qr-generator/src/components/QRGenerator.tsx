@@ -37,7 +37,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleFormSubmit = async (url: string, backgroundColor: string) => {
+  const handleFormSubmit = async (url: string, backgroundColor: string, bodyStyle: string) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -48,7 +48,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
         body: JSON.stringify({
           url,
           config: {
-            body: "round",
+            body: bodyStyle,
             eye: "frame6",
             eyeBall: "ball15",
             bgColor: backgroundColor.replace("#", ""),
@@ -179,10 +179,10 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
               >
                 QRify
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setCurrentView("generate")}
-                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                  className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
                 >
                   Generate
                 </button>
@@ -191,14 +191,14 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
                   <>
                     <button
                       onClick={() => setCurrentView("history")}
-                      className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                      className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
                     >
                       History
                     </button>
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center">
                       <button
                         onClick={handleLogout}
-                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                        className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
                       >
                         Logout
                       </button>
@@ -207,7 +207,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
                 ) : (
                   <button
                     onClick={() => setAuthMode("login")}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                    className="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
                   >
                     Login
                   </button>
