@@ -4,7 +4,10 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import URLForm from "@/components/URLForm";
 import HistoryView from "@/components/HistoryView";
+import LoginForm from "@/components/LoginForm";
+import RegisterForm from "@/components/RegisterForm";
 import { convertSvgToPng } from "@/utils/converter";
+import { useAuth } from "@/components/Auth";
 
 interface QRGeneratorAppProps {
   initialView?: "generate" | "history";
@@ -13,7 +16,9 @@ interface QRGeneratorAppProps {
 const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
   initialView = "generate",
 }) => {
+  const { user, logout } = useAuth();
   const [currentView, setCurrentView] = useState(initialView);
+  const [authMode, setAuthMode] = useState<"login" | "register" | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -32,11 +37,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleFormSubmit = async (
-    url: string,
-    saveToHistory: boolean,
-    backgroundColor: string
-  ) => {
+  const handleFormSubmit = async (url: string, backgroundColor: string) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -58,8 +59,9 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
       if (!response.ok) throw new Error("Failed to generate QR code");
 
       const svgContent = await response.text();
-      const trackingId = response.headers.get('X-Tracking-Id');
-      const img = document.createElement('img');
+      const trackingId = response.headers.get("X-Tracking-Id");
+
+      const img = document.createElement("img");
       const canvas = document.createElement("canvas");
       canvas.width = 350;
       canvas.height = 350;
@@ -86,7 +88,6 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
           url,
           qrCode: pngDataUrl,
           trackingId,
-          showInHistory: saveToHistory
         }),
       });
     } catch (err) {
@@ -136,6 +137,18 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
     }
   };
 
+  const handleLogout = async () => {
+    await logout();
+
+    setQrCode(null);
+    setError(null);
+    setCurrentView("generate");
+    setAuthMode(null);
+    localStorage.clear();
+
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background */}
@@ -166,31 +179,57 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
               >
                 QRify
               </div>
-              <div className="flex space-x-8">
+              <div className="flex items-center space-x-4">
                 <button
                   onClick={() => setCurrentView("generate")}
-                  className={`text-base transition-colors ${
-                    currentView === "generate"
-                      ? "text-white"
-                      : "text-white/70 hover:text-white"
-                  }`}
+                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
                 >
                   Generate
                 </button>
-                <button
-                  onClick={() => setCurrentView("history")}
-                  className={`text-base transition-colors ${
-                    currentView === "history"
-                      ? "text-white"
-                      : "text-white/70 hover:text-white"
-                  }`}
-                >
-                  History
-                </button>
+
+                {user ? (
+                  <>
+                    <button
+                      onClick={() => setCurrentView("history")}
+                      className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                    >
+                      History
+                    </button>
+                    <div className="flex items-center space-x-4">
+                      <button
+                        onClick={handleLogout}
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setAuthMode("login")}
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                  >
+                    Login
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </nav>
+
+        {/* Auth Modals */}
+        {authMode === "login" && (
+          <LoginForm
+            onClose={() => setAuthMode(null)}
+            onSwitchToRegister={() => setAuthMode("register")}
+          />
+        )}
+        {authMode === "register" && (
+          <RegisterForm
+            onClose={() => setAuthMode(null)}
+            onSwitchToLogin={() => setAuthMode("login")}
+          />
+        )}
 
         {/* Generate QR and History */}
         <div className="pt-16">
@@ -201,7 +240,9 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
                   QR Generator
                 </h1>
                 <p className="text-xl text-white/80">
-                  Create static QR instantly for any URL
+                  {user
+                    ? "Create and save QR codes for your URLs"
+                    : "Create QR codes instantly for any URL"}
                 </p>
               </div>
 
@@ -283,8 +324,12 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
                 </div>
               </div>
             </div>
-          ) : (
+          ) : user ? (
             <HistoryView />
+          ) : (
+            <p className="text-center text-white">
+              Please log in to view history
+            </p>
           )}
         </div>
       </div>

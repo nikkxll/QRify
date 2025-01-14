@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
+import { authenticateUser } from "@/middleware/auth";
 
 const BASE_URL = process.env.BASE_URL!;
 const API_URL = process.env.QR_API_URL!;
@@ -16,6 +17,7 @@ const API_URL = process.env.QR_API_URL!;
 export async function POST(req: NextRequest) {
   try {
     const { config } = await req.json();
+    const user = await authenticateUser(req);
 
     const qrId = randomUUID();
     const trackingUrl = `${BASE_URL}/redirect/${qrId}`;
@@ -36,11 +38,14 @@ export async function POST(req: NextRequest) {
       throw new Error('QR API response error');
     }
 
+    const userId = user?.userId ? String(user.userId) : '';
+
     const imageBuffer = await response.arrayBuffer();
     return new NextResponse(imageBuffer, {
       headers: { 
         'Content-Type': 'image/svg+xml',
-        'X-Tracking-Id': qrId
+        'X-Tracking-Id': qrId,
+        'X-User-Id': userId
       }
     });
 

@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useAuth } from "@/components/Auth";
+import LoginForm from "@/components/LoginForm";
+import RegisterForm from "@/components/RegisterForm";
 
 interface QRCodeRecord {
   _id: string;
@@ -9,9 +12,12 @@ interface QRCodeRecord {
   qrCode: string;
   scans: number;
   createdAt: string;
+  userId?: string;
 }
 
 export default function HistoryView() {
+  const { user } = useAuth();
+  const [authMode, setAuthMode] = useState<'login' | 'register' | null>(null);
   const [qrCodes, setQrCodes] = useState<QRCodeRecord[]>([]);
   const [filteredQrCodes, setFilteredQrCodes] = useState<QRCodeRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,6 +30,9 @@ export default function HistoryView() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
+        
         const response = await fetch("/api/qr/history");
         if (!response.ok) throw new Error("Failed to fetch history");
 
@@ -38,8 +47,14 @@ export default function HistoryView() {
       }
     };
 
-    fetchHistory();
-  }, []);
+    if (user) {
+      fetchHistory();
+    } else {
+      setQrCodes([]);
+      setFilteredQrCodes([]);
+      setIsLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     const filtered = qrCodes.filter((qr) =>
@@ -100,6 +115,51 @@ export default function HistoryView() {
     );
   }
 
+  if (!user) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+        <h1 className="text-5xl font-bold text-white mb-6">History</h1>
+        <div className="bg-black/20 backdrop-blur-xl rounded-2xl p-8 max-w-lg mx-auto">
+          <p className="text-xl text-white/80 mb-4">
+            Access your QR code history
+          </p>
+          <p className="text-white/60 mb-6">
+            Login or create an account to save your QR codes
+          </p>
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={() => setAuthMode('login')}
+              className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-8 
+                rounded-lg transition-colors"
+            >
+              Login
+            </button>
+            <button
+              onClick={() => setAuthMode('register')}
+              className="bg-white/10 hover:bg-white/20 text-white py-3 px-8 
+                rounded-lg transition-colors"
+            >
+              Create Account
+            </button>
+          </div>
+        </div>
+
+        {authMode === 'login' && (
+          <LoginForm 
+            onClose={() => setAuthMode(null)}
+            onSwitchToRegister={() => setAuthMode('register')}
+          />
+        )}
+        {authMode === 'register' && (
+          <RegisterForm 
+            onClose={() => setAuthMode(null)}
+            onSwitchToLogin={() => setAuthMode('login')}
+          />
+        )}
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -111,8 +171,7 @@ export default function HistoryView() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <div className="text-center">
-        <h1 className="text-5xl font-bold text-white mb-6">History</h1>
-        <p className="text-xl text-white/80">Previously generated QR codes</p>
+        <h1 className="text-5xl font-bold text-white mb-6">Your QR Codes</h1>
         <div className="max-w-md mx-auto py-6">
           <input
             type="text"
@@ -126,47 +185,49 @@ export default function HistoryView() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentQRs.map((qr) => (
-          <div
-            key={qr._id}
-            className="bg-black/20 backdrop-blur-xl rounded-2xl p-6"
-          >
-            <p className="text-white truncate mb-2">{qr.url}</p>
-            <div className="w-64 h-64 mx-auto rounded-lg">
-              <Image
-                src={`data:image/png;base64,${qr.qrCode}`}
-                alt="QR Code"
-                width={300}
-                height={300}
-                className="object-contain"
-                style={{ imageRendering: "pixelated" }}
-              />
-            </div>
-            <div className="mt-4 flex justify-between items-center">
-              <p className="text-sm text-white/50">
-                {new Date(qr.createdAt).toLocaleDateString()}
-              </p>
-              <span className="text-purple-400">Scans: {qr.scans}</span>
-              <button
-                onClick={() => handleDownload(qr.qrCode)}
-                className="text-purple-400"
-              >
-                Download
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
       {filteredQrCodes.length === 0 ? (
         <div className="text-center text-white/50 mt-8">
           {searchTerm
             ? "No matching QR codes found"
-            : "No QR codes in history yet"}
+            : "You haven't created any QR codes yet"}
         </div>
       ) : (
-        <PaginationControls />
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentQRs.map((qr) => (
+              <div
+                key={qr._id}
+                className="bg-black/20 backdrop-blur-xl rounded-2xl p-6"
+              >
+                <p className="text-white truncate mb-2">{qr.url}</p>
+                <div className="w-64 h-64 mx-auto rounded-lg">
+                  <Image
+                    src={`data:image/png;base64,${qr.qrCode}`}
+                    alt="QR Code"
+                    width={300}
+                    height={300}
+                    className="object-contain"
+                    style={{ imageRendering: "pixelated" }}
+                  />
+                </div>
+                <div className="mt-4 flex justify-between items-center">
+                  <p className="text-sm text-white/50">
+                    {new Date(qr.createdAt).toLocaleDateString()}
+                  </p>
+                  <span className="text-purple-400">Scans: {qr.scans}</span>
+                  <button
+                    onClick={() => handleDownload(qr.qrCode)}
+                    className="text-purple-400 hover:text-purple-300 transition-colors"
+                  >
+                    Download
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <PaginationControls />
+        </>
       )}
     </div>
   );

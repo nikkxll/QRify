@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { isValidUrl } from "@/utils/urlValidator";
+import { useAuth } from "@/components/Auth";
 
 interface URLFormProps {
-  onSubmit: (url: string, saveToHistory: boolean, backgroundColor: string) => void;
+  onSubmit: (url: string, backgroundColor: string) => void;
 }
 
 const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
@@ -22,7 +23,6 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
     return "#FFFFFF";
   });
   const [isValid, setIsValid] = useState(true);
-  const [saveToHistory, setSaveToHistory] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('qr_url', url);
@@ -34,7 +34,7 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
 
     if (isValidUrl(url)) {
         setIsValid(true);
-        onSubmit(url, saveToHistory, backgroundColor);
+        onSubmit(url, backgroundColor);
       } else {
         setIsValid(false);
       }
@@ -97,20 +97,6 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
             placeholder="#FFFFFF"
           />
         </div>
-      </div>
-
-      <div className="flex items-center">
-        <input
-          type="checkbox"
-          id="saveHistory"
-          checked={saveToHistory}
-          onChange={(e) => setSaveToHistory(e.target.checked)}
-          className="h-4 w-4 bg-white/10 border-white/20 rounded 
-            focus:ring-purple-500 focus:ring-offset-0"
-        />
-        <label htmlFor="saveHistory" className="ml-2 text-sm text-white/80">
-          Save to shared history
-        </label>
       </div>
 
       <button

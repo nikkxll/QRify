@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDb } from "@/db/mongodb";
 import { QRCode, IQRCode } from "@/models/QRCode";
+import { authenticateUser } from "@/middleware/auth";
+import { FilterQuery } from "mongoose";
 
 /**
  * Save QR Code
@@ -10,8 +12,7 @@ import { QRCode, IQRCode } from "@/models/QRCode";
  * {
  *   url: string,
  *   qrCode: string,
- *   trackingId: string,
- *   showInHistory: boolean
+ *   trackingId: string
  * }
  * 
  * Response:
@@ -22,7 +23,8 @@ import { QRCode, IQRCode } from "@/models/QRCode";
 export async function POST(req: NextRequest) {
   try {
     await connectToDb();
-    const { url, qrCode, trackingId, showInHistory } = await req.json();
+    const user = await authenticateUser(req);
+    const { url, qrCode, trackingId } = await req.json();
     
     const cleanQRCode = qrCode.replace(/^data:image\/\w+;base64,/, '');
     
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest) {
       trackingId,
       url,
       qrCode: cleanQRCode,
-      showInHistory
+      userId: user?.userId || null
     });
     
     const savedQR = await newQR.save();
@@ -54,12 +56,20 @@ export async function POST(req: NextRequest) {
  * - Failure: JSON error response with status 500
  */
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     await connectToDb();
-    const qrCodes: IQRCode[] = await QRCode.find({ showInHistory: true })
+    const user = await authenticateUser(req);
+
+    if (!user?.userId) {
+      return NextResponse.json([]);
+    }
+
+    const query: FilterQuery<IQRCode> = { userId: user.userId };
+
+    const qrCodes: IQRCode[] = await QRCode.find(query)
       .sort({ createdAt: -1 })
-      .select('url qrCode createdAt scans')
+      .select('url qrCode createdAt scans userId')
       .exec();
     
     return NextResponse.json(qrCodes);
