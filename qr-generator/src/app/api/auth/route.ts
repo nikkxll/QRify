@@ -14,6 +14,13 @@ async function createToken(userId: string) {
     .sign(JWT_SECRET);
 }
 
+/**
+ * Handles user authentication operations including registration and login
+ * Manages secure cookie-based session storage and user data persistence
+ * 
+ * @param req - Next.js request object containing authentication parameters
+ * @returns JSON response with user data or error message
+ */
 export async function POST(req: NextRequest) {
   try {
     await connectToDb();
@@ -91,6 +98,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
+/**
+ * Handles user logout by removing the authentication cookie
+ * 
+ * @returns JSON response indicating successful logout
+ */
 export async function DELETE() {
   const cookieStore = await cookies();
 

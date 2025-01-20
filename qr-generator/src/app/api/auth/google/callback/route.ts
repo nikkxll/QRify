@@ -11,6 +11,14 @@ const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo';
 const REDIRECT_URI = `${process.env.BASE_URL}/api/auth/google/callback`;
 
+/**
+ * Handles the OAuth callback from Google after user authorization
+ * This endpoint processes the authorization code, exchanges it for tokens,
+ * retrieves user information, and creates or updates user records
+ * 
+ * @param request - Next.js request object containing query parameters
+ * @returns Redirects to home page with auth token or error page on failure
+ */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
