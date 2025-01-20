@@ -15,6 +15,9 @@ To run the application correctly, create a ```.env``` file in the ```qr-generato
 MONGODB_URI - your local MongoDB URI
 BASE_URL - protocol + your machine IP + port (e.g. http://192.168.x.x:3000)
 QR_API_URL - QRCode Monkey API (https://api.qrcode-monkey.com/qr/custom)
+JWT_SECRET - A secret key used to sign and verify JWT (JSON Web Tokens) for authentication
+GOOGLE_CLIENT_ID - Obtained from the Google Cloud Console when you register your application
+GOOGLE_CLIENT_SECRET - A secret key provided by Google when you register your application
 ```
 
 In dev mode
@@ -27,10 +30,6 @@ cd qr-generator/ && npm i && npm run dev
 Link to the web page:
 
 [https://qrify-it.vercel.app/](https://qrify-it.vercel.app/)
-
-_Note: Initial loading may take 2-3 minutes. Refresh the page if necessary._
-
-You may experience delays or failures due to API rate limits or processing time. If this occurs, please try again after 20-30 seconds or reload the page.
 
 ##
 
