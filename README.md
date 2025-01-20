@@ -26,7 +26,7 @@ cd qr-generator/ && npm i && npm run dev
 
 Link to the web page:
 
-[https://qrify-56d0.onrender.com/](https://qrify-it.vercel.app/)
+[https://qrify-it.vercel.app/](https://qrify-it.vercel.app/)
 
 _Note: Initial loading may take 2-3 minutes. Refresh the page if necessary._
 
