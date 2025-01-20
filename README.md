@@ -99,6 +99,75 @@ Example of successful response:
 }
 ```
 
+Google OAuth Initialize
+
+- Endpoint: GET /api/auth/google
+- Initiates Google OAuth authentication flow
+
+Example of response:
+
+```
+{
+  "status": 302,
+  "headers": {
+    "Location": "https://accounts.google.com/o/oauth2/v2/auth..."
+  }
+}
+```
+
+Google OAuth Callback
+
+- Endpoint: GET /api/auth/google/callback
+- Handles OAuth callback from Google
+
+Example of response:
+
+```
+{
+  "status": 302,
+  "headers": {
+    "Location": "/",
+    "Set-Cookie": "auth_token=..."
+  }
+}
+```
+
+Email Authentication
+
+- Endpoint: POST /api/auth
+- Handles login and registration
+
+Example of response:
+
+```
+{
+  "status": 200,
+  "body": {
+    "user": {
+      "id": "user_id",
+      "email": "user@example.com",
+      "name": "John Doe"
+    }
+  }
+}
+```
+
+Logout
+
+- Endpoint: DELETE /api/auth
+- Logs out current user
+
+Example of response:
+
+```
+{
+  "status": 200,
+  "body": {
+    "success": true
+  }
+}
+```
+
 ## Setup and run locally
 
 To run the application correctly, create a ```.env``` file in the ```qr-generator``` directory and add the following variables:
