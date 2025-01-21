@@ -81,3 +81,60 @@ export async function GET() {
     );
   }
 }
+
+/**
+ * Delete QR Code
+ * - Deletes a specific QR code from user's history
+ * 
+ * Request Parameters:
+ * - qrId: string (QR code ID to delete)
+ * 
+ * Response:
+ * - Success: { success: true }
+ * - Failure: JSON error response with appropriate status
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    await connectToDb();
+    const user = await authenticateUser();
+
+    if (!user?.userId) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(req.url);
+    const qrId = searchParams.get('qrId');
+
+    if (!qrId) {
+      return NextResponse.json(
+        { error: "QR code ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const qrCode = await QRCode.findOne({
+      _id: qrId,
+      userId: user.userId
+    });
+
+    if (!qrCode) {
+      return NextResponse.json(
+        { error: "QR code not found" },
+        { status: 404 }
+      );
+    }
+
+    await QRCode.deleteOne({ _id: qrId, userId: user.userId });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Failed to delete QR code:", error);
+    return NextResponse.json(
+      { error: "Failed to delete QR code" },
+      { status: 500 }
+    );
+  }
+}

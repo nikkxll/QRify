@@ -17,7 +17,7 @@ interface QRCodeRecord {
 
 export default function HistoryView() {
   const { user } = useAuth();
-  const [authMode, setAuthMode] = useState<'login' | 'register' | null>(null);
+  const [authMode, setAuthMode] = useState<"login" | "register" | null>(null);
   const [qrCodes, setQrCodes] = useState<QRCodeRecord[]>([]);
   const [filteredQrCodes, setFilteredQrCodes] = useState<QRCodeRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,7 +32,7 @@ export default function HistoryView() {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         const response = await fetch("/api/qr/history");
         if (!response.ok) throw new Error("Failed to fetch history");
 
@@ -107,6 +107,48 @@ export default function HistoryView() {
     }
   };
 
+  const handleDelete = async (qrId: string) => {
+    try {
+      const response = await fetch(`/api/qr/history?qrId=${qrId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete QR code");
+      }
+
+      setQrCodes((prevCodes) => prevCodes.filter((code) => code._id !== qrId));
+      setFilteredQrCodes((prevCodes) =>
+        prevCodes.filter((code) => code._id !== qrId)
+      );
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
+  };
+
+  const handleShare = async (qrCode: string) => {
+    try {
+      const response = await fetch(`data:image/png;base64,${qrCode}`);
+      const blob = await response.blob();
+      const file = new File([blob], "qr-code.png", { type: "image/png" });
+
+      if (navigator.share && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: "QR Code",
+          text: "Check out this QR code",
+          files: [file],
+        });
+      } else {
+        alert(
+          "Your device doesn't support direct sharing. The QR code will be downloaded instead."
+        );
+        await handleDownload(qrCode);
+      }
+    } catch (error) {
+      console.error("Failed to share QR code:", error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -128,14 +170,14 @@ export default function HistoryView() {
           </p>
           <div className="flex justify-center space-x-4">
             <button
-              onClick={() => setAuthMode('login')}
+              onClick={() => setAuthMode("login")}
               className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-8 
                 rounded-lg transition-colors"
             >
               Login
             </button>
             <button
-              onClick={() => setAuthMode('register')}
+              onClick={() => setAuthMode("register")}
               className="bg-white/10 hover:bg-white/20 text-white py-3 px-8 
                 rounded-lg transition-colors"
             >
@@ -144,16 +186,16 @@ export default function HistoryView() {
           </div>
         </div>
 
-        {authMode === 'login' && (
-          <LoginForm 
+        {authMode === "login" && (
+          <LoginForm
             onClose={() => setAuthMode(null)}
-            onSwitchToRegister={() => setAuthMode('register')}
+            onSwitchToRegister={() => setAuthMode("register")}
           />
         )}
-        {authMode === 'register' && (
-          <RegisterForm 
+        {authMode === "register" && (
+          <RegisterForm
             onClose={() => setAuthMode(null)}
-            onSwitchToLogin={() => setAuthMode('login')}
+            onSwitchToLogin={() => setAuthMode("login")}
           />
         )}
       </div>
@@ -199,7 +241,15 @@ export default function HistoryView() {
                 key={qr._id}
                 className="bg-black/20 backdrop-blur-xl rounded-2xl p-6"
               >
-                <p className="text-white truncate mb-2">{qr.url}</p>
+                <div className="flex justify-between items-center gap-10">
+                  <p className="text-white truncate mb-2">{qr.url}</p>
+                  <button
+                    onClick={() => handleDelete(qr._id)}
+                    className="text-red-400 hover:text-red-300 transition-colors mb-2"
+                  >
+                    Delete
+                  </button>
+                </div>
                 <div className="w-64 h-64 mx-auto rounded-lg">
                   <Image
                     src={`data:image/png;base64,${qr.qrCode}`}
@@ -215,6 +265,12 @@ export default function HistoryView() {
                     {new Date(qr.createdAt).toLocaleDateString()}
                   </p>
                   <span className="text-purple-400">Scans: {qr.scans}</span>
+                  <button
+                    onClick={() => handleShare(qr.qrCode)}
+                    className="text-purple-400 hover:text-purple-300 transition-colors"
+                  >
+                    Share
+                  </button>
                   <button
                     onClick={() => handleDownload(qr.qrCode)}
                     className="text-purple-400 hover:text-purple-300 transition-colors"

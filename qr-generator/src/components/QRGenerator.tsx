@@ -7,6 +7,7 @@ import HistoryView from "@/components/HistoryView";
 import LoginForm from "@/components/LoginForm";
 import RegisterForm from "@/components/RegisterForm";
 import { convertSvgToPng } from "@/utils/converter";
+import { downloadFile } from "@/utils/downloadFile";
 import { useAuth } from "@/components/Auth";
 
 interface QRGeneratorAppProps {
@@ -103,13 +104,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
     if (!qrCode) return;
     try {
       const pngBlob = await convertSvgToPng(qrCode);
-      const blobUrl = URL.createObjectURL(pngBlob);
-
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = "qr_code.png";
-      link.click();
-      URL.revokeObjectURL(blobUrl);
+      await downloadFile(Promise.resolve(pngBlob));
     } catch (error) {
       console.error("Download failed:", error);
     }
@@ -121,15 +116,15 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
       const pngBlob = await convertSvgToPng(qrCode);
       const file = new File([pngBlob], "qr-code.png", { type: "image/png" });
 
-      if (navigator.share) {
+      if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: "QR Code",
-          text: "Check out this QR code!",
+          text: "Check out this QR code",
           files: [file],
         });
       } else {
-        await navigator.clipboard.writeText("QR Code Generated");
-        alert("Link copied to clipboard!");
+        alert("Your device doesn't support direct sharing. The QR code will be downloaded instead.");
+        await downloadFile(Promise.resolve(pngBlob));
       }
     } catch (err) {
       console.error("Failed to share QR code:", err);
@@ -184,7 +179,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
                   onClick={() => setCurrentView("generate")}
                   className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
                 >
-                  Generate
+                  Home
                 </button>
 
                 {user ? (

@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateUser } from "@/middleware/auth";
+import { getContrastColor } from "@/utils/colorUtils";
 
 const BASE_URL = process.env.BASE_URL!;
 const API_URL = process.env.QR_API_URL!;
@@ -22,12 +23,23 @@ export async function POST(req: NextRequest) {
     const qrId = randomUUID();
     const trackingUrl = `${BASE_URL}/redirect/${qrId}`;
 
+    const contrastColor = getContrastColor(config.bgColor);
+
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         data: trackingUrl,
-        config,
+        config: {
+          ...config,
+          bodyColor: contrastColor,
+          eye1Color: contrastColor,
+          eye2Color: contrastColor,
+          eye3Color: contrastColor,
+          eyeBall1Color: contrastColor,
+          eyeBall2Color: contrastColor,
+          eyeBall3Color: contrastColor
+        },
         size: 300,
         download: false,
         file: "svg"
