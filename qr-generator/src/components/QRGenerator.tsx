@@ -43,7 +43,11 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
     backgroundColor: string,
     bodyStyle: string,
     eyeStyle: string,
-    uploadedLogoId?: string | null
+    uploadedLogoId?: string | null,
+    gradientColor1?: string | null,
+    gradientColor2?: string | null,
+    gradientType?: "linear" | "radial" | null,
+    gradientOnEyes?: boolean | null
   ) => {
     try {
       setIsLoading(true);
@@ -60,6 +64,10 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
             eyeBall: "ball15",
             bgColor: backgroundColor.replace("#", ""),
             logo: uploadedLogoId,
+            gradientColor1: gradientColor1?.replace("#", ""),
+            gradientColor2: gradientColor2?.replace("#", ""),
+            gradientType,
+            gradientOnEyes,
           },
         }),
       });

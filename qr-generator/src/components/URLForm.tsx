@@ -13,7 +13,11 @@ interface URLFormProps {
     backgroundColor: string,
     bodyStyle: string,
     eyeStyle: string,
-    uploadedLogoId?: string | null
+    uploadedLogoId?: string | null,
+    gradientColor1?: string,
+    gradientColor2?: string,
+    gradientType?: "linear" | "radial",
+    gradientOnEyes?: boolean
   ) => void;
 }
 
@@ -27,30 +31,43 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
   const [isValid, setIsValid] = useState(true);
   const [uploadedLogoId, setUploadedLogoId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [gradientColor1, setGradientColor1] = useState("#000000");
+  const [gradientColor2, setGradientColor2] = useState("#000000");
+  const [gradientType, setGradientType] = useState<"linear" | "radial">(
+    "linear"
+  );
+  const [useGradient, setUseGradient] = useState(false);
+  const [gradientOnEyes, setGradientOnEyes] = useState(false);
 
   useEffect(() => {
     setUrl(localStorage.getItem("qr_url") || "");
     setBackgroundColor(
       localStorage.getItem("qr_background_color") || "#FFFFFF"
     );
-    setBodyStyle(localStorage.getItem("qr_body_style") || "round");
-    setEyeStyle(localStorage.getItem("eye_style") || "frame0");
   }, []);
 
   useEffect(() => {
     if (url) localStorage.setItem("qr_url", url);
     if (backgroundColor)
       localStorage.setItem("qr_background_color", backgroundColor);
-    if (bodyStyle) localStorage.setItem("qr_body_style", bodyStyle);
-    if (eyeStyle) localStorage.setItem("eye_style", eyeStyle);
-  }, [url, backgroundColor, bodyStyle, eyeStyle]);
+  }, [url, backgroundColor]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isValidUrl(url)) {
       setIsValid(true);
-      onSubmit(url, backgroundColor, bodyStyle, eyeStyle, uploadedLogoId);
+      onSubmit(
+        url,
+        backgroundColor,
+        bodyStyle,
+        eyeStyle,
+        uploadedLogoId,
+        gradientColor1,
+        gradientColor2,
+        gradientType,
+        gradientOnEyes
+      );
     } else {
       setIsValid(false);
     }
@@ -142,6 +159,108 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
               Dark background detected. Generated QR code might be invisible.
             </span>
           </p>
+        )}
+      </div>
+
+      <div>
+        <div className="flex items-center mb-4">
+          <input
+            type="checkbox"
+            id="useGradient"
+            checked={useGradient}
+            onChange={(e) => setUseGradient(e.target.checked)}
+            className="h-4 w-4 bg-white/10 border-white/20 rounded"
+          />
+          <label htmlFor="useGradient" className="ml-2 text-sm text-white/80">
+            Use gradient
+          </label>
+        </div>
+
+        {useGradient && (
+          <>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-2">
+                  Gradient Color 1
+                </label>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="color"
+                    value={gradientColor1}
+                    onChange={(e) => setGradientColor1(e.target.value)}
+                    className="h-10 w-20 bg-transparent border-0 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={gradientColor1}
+                    onChange={(e) => {
+                      if (e.target.value.startsWith("#")) {
+                        setGradientColor1(e.target.value);
+                      }
+                    }}
+                    className="w-28 bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-2">
+                  Gradient Color 2
+                </label>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="color"
+                    value={gradientColor2}
+                    onChange={(e) => setGradientColor2(e.target.value)}
+                    className="h-10 w-20 bg-transparent border-0 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={gradientColor2}
+                    onChange={(e) => {
+                      if (e.target.value.startsWith("#")) {
+                        setGradientColor2(e.target.value);
+                      }
+                    }}
+                    className="w-28 bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-2">
+                  Gradient Type
+                </label>
+                <select
+                  value={gradientType}
+                  onChange={(e) =>
+                    setGradientType(e.target.value as "linear" | "radial")
+                  }
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 
+                  text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="linear">Linear</option>
+                  <option value="radial">Radial</option>
+                </select>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="gradientOnEyes"
+                  checked={gradientOnEyes}
+                  onChange={(e) => setGradientOnEyes(e.target.checked)}
+                  className="h-4 w-4 bg-white/10 border-white/20 rounded"
+                />
+                <label
+                  htmlFor="gradientOnEyes"
+                  className="ml-2 text-sm text-white/80"
+                >
+                  Apply gradient to eyes
+                </label>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
