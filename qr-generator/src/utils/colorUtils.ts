@@ -10,7 +10,3 @@ export function isColorDark(hexColor: string): boolean {
   
   return luminance < 0.1;
 }
-
-export function getContrastColor(bgColor: string): string {
-  return isColorDark(bgColor) ? 'BBBBBB' : '000000';
-}
