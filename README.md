@@ -15,6 +15,7 @@ To run the application correctly, create a ```.env``` file in the ```qr-generato
 MONGODB_URI - your local MongoDB URI
 BASE_URL - protocol + your machine IP + port (e.g. http://192.168.x.x:3000)
 QR_API_URL - QRCode Monkey API (https://api.qrcode-monkey.com/qr/custom)
+QR_API_URL_IMG - QRCode Monkey API for logos (https://api.qrcode-monkey.com/qr/uploadImage)
 JWT_SECRET - A secret key used to sign and verify JWT (JSON Web Tokens) for authentication
 GOOGLE_CLIENT_ID - Obtained from the Google Cloud Console when you register your application
 GOOGLE_CLIENT_SECRET - A secret key provided by Google when you register your application
