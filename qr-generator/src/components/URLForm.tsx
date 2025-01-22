@@ -80,6 +80,10 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
         alert("Please upload a PNG, JPG or SVG file");
         return;
       }
+      if (file.size > MAX_LOGO_SIZE) {
+        alert('Logo must be less than 1MB');
+        return;
+      }
       try {
         setIsUploading(true);
         const uploadedFile = await uploadImageToQR(file);
