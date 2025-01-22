@@ -38,7 +38,13 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleFormSubmit = async (url: string, backgroundColor: string, bodyStyle: string, eyeStyle: string) => {
+  const handleFormSubmit = async (
+    url: string,
+    backgroundColor: string,
+    bodyStyle: string,
+    eyeStyle: string,
+    uploadedLogoId?: string | null
+  ) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -53,6 +59,7 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
             eye: eyeStyle,
             eyeBall: "ball15",
             bgColor: backgroundColor.replace("#", ""),
+            logo: uploadedLogoId,
           },
         }),
       });
@@ -123,7 +130,9 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
           files: [file],
         });
       } else {
-        alert("Your device doesn't support direct sharing. The QR code will be downloaded instead.");
+        alert(
+          "Your device doesn't support direct sharing. The QR code will be downloaded instead."
+        );
         await downloadFile(Promise.resolve(pngBlob));
       }
     } catch (err) {

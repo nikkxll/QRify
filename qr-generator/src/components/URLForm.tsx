@@ -5,15 +5,19 @@ import { isValidUrl } from "@/utils/urlValidator";
 import QRStyleSelect from "@/components/QRStyleSelect";
 import QREyeSelect from "@/components/QREyeSelect";
 import { isColorDark } from "@/utils/colorUtils";
+import { uploadImageToQR } from "@/utils/uploadImage";
 
 interface URLFormProps {
   onSubmit: (
     url: string,
     backgroundColor: string,
     bodyStyle: string,
-    eyeStyle: string
+    eyeStyle: string,
+    uploadedLogoId?: string | null
   ) => void;
 }
+
+const MAX_LOGO_SIZE = 1024 * 1024;
 
 const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
   const [url, setUrl] = useState("");
@@ -21,6 +25,8 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
   const [bodyStyle, setBodyStyle] = useState("round");
   const [eyeStyle, setEyeStyle] = useState("frame0");
   const [isValid, setIsValid] = useState(true);
+  const [uploadedLogoId, setUploadedLogoId] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     setUrl(localStorage.getItem("qr_url") || "");
@@ -44,9 +50,29 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
 
     if (isValidUrl(url)) {
       setIsValid(true);
-      onSubmit(url, backgroundColor, bodyStyle, eyeStyle);
+      onSubmit(url, backgroundColor, bodyStyle, eyeStyle, uploadedLogoId);
     } else {
       setIsValid(false);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.match(/image\/(png|jpeg|svg\+xml)/)) {
+        alert("Please upload a PNG, JPG or SVG file");
+        return;
+      }
+      try {
+        setIsUploading(true);
+        const uploadedFile = await uploadImageToQR(file);
+        setUploadedLogoId(uploadedFile);
+      } catch (error) {
+        console.error("Upload failed:", error);
+        alert("Failed to upload logo");
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -107,16 +133,14 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
             placeholder="#FFFFFF"
           />
         </div>
-        {isColorDark(backgroundColor.replace('#', '')) && (
+        {isColorDark(backgroundColor.replace("#", "")) && (
           <p className="mt-5 text-sm text-yellow-400 flex items-center space-x-2">
-            <svg 
-              className="w-4 h-4" 
-              fill="currentColor" 
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2L1 21h22M12 6l7.53 13H4.47M11 10v4h2v-4m-2 6v2h2v-2" />
             </svg>
-            <span>Dark background detected. Generated QR code might be invisible.</span>
+            <span>
+              Dark background detected. Generated QR code might be invisible.
+            </span>
           </p>
         )}
       </div>
@@ -133,6 +157,30 @@ const URLForm: React.FC<URLFormProps> = ({ onSubmit }) => {
           Eye Style
         </label>
         <QREyeSelect value={eyeStyle} onChange={setEyeStyle} />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-white/80 mb-2">
+          Custom Logo
+        </label>
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/svg+xml"
+          onChange={handleLogoUpload}
+          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 
+      text-white file:bg-purple-600 file:text-white file:border-0 
+      file:rounded-lg file:px-4 file:py-2 file:mr-4
+      hover:file:bg-purple-700 file:cursor-pointer cursor-pointer"
+          disabled={isUploading}
+        />
+        {isUploading && (
+          <p className="text-sm text-white/60 mt-1">Uploading logo...</p>
+        )}
+        {uploadedLogoId && !isUploading && (
+          <p className="text-sm text-green-400 mt-1">
+            Logo uploaded successfully
+          </p>
+        )}
       </div>
 
       <button
