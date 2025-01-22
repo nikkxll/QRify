@@ -253,8 +253,8 @@ const QRGeneratorApp: React.FC<QRGeneratorAppProps> = ({
                 </h1>
                 <p className="text-xl text-white/80">
                   {user
-                    ? "Create and save QR codes for your URLs"
-                    : "Create QR codes instantly for any URL"}
+                    ? "Create and save codes for your URLs"
+                    : "Create codes instantly for any URL"}
                 </p>
               </div>
 
